@@ -40,7 +40,7 @@ export default function ChatPage() {
   }
 
   function handleExcluirMensagem(id) {
-    let atualizadaListaDeMensagens = [...listaDeMensagens];
+    const atualizadaListaDeMensagens = [...listaDeMensagens];
     const listaDeMensagensFiltradas = atualizadaListaDeMensagens.filter(
       mensagem => mensagem.id !== id
     );
