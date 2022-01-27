@@ -1,30 +1,61 @@
-import { Box, Text, TextField, Image, Button } from '@skynexui/components';
 import React from 'react';
+import { createClient } from '@supabase/supabase-js';
 import appConfig from '../config.json';
+import { Box, Text, TextField, Image, Button } from '@skynexui/components';
+
+const SUPABASE_ANON_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTY0MzI2MDMxMywiZXhwIjoxOTU4ODM2MzEzfQ.LSA5by-ur_BIrTUY8qxbDS4qTOZ1bIc4ch38vt3ZEA4';
+
+const SUPABASE_URL = 'https://xmvovlzvzihgmxhjtyvn.supabase.co';
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 export default function ChatPage() {
   const [mensagem, setMensagem] = React.useState('');
   const [listaDeMensagens, setListaDeMensagens] = React.useState([]);
 
+  React.useEffect(() => {
+    supabaseClient
+      .from('mensagens')
+      .select('*')
+      .order('id', { ascending: false })
+      .then(({ data }) => {
+        setListaDeMensagens(data);
+      });
+  }, []);
+
   function handleNovaMensagem(novaMensagem) {
     const mensagem = {
-      id: listaDeMensagens.length + 1,
       de: 'vitorgaletti',
       texto: novaMensagem
     };
-    setListaDeMensagens([mensagem, ...listaDeMensagens]);
+
+    supabaseClient
+      .from('mensagens')
+      .insert([mensagem])
+      .then(({ data }) => {
+        setListaDeMensagens([data[0], ...listaDeMensagens]);
+      });
+
     setMensagem('');
   }
 
   function handleExcluirMensagem(id) {
     let atualizadaListaDeMensagens = [...listaDeMensagens];
-    const indexMensagem = atualizadaListaDeMensagens.findIndex(
-      mensagem => mensagem.id === id
+    const listaDeMensagensFiltradas = atualizadaListaDeMensagens.filter(
+      mensagem => mensagem.id !== id
     );
-    if (indexMensagem >= 0) {
-      atualizadaListaDeMensagens.splice(indexMensagem, 1);
-      setListaDeMensagens(atualizadaListaDeMensagens);
-    }
+
+    atualizadaListaDeMensagens.map(msg => {
+      if (msg.id === id) {
+        supabaseClient
+          .from('mensagens')
+          .delete()
+          .match({ id: msg.id })
+          .then(() => {
+            setListaDeMensagens(listaDeMensagensFiltradas);
+          });
+      }
+    });
   }
 
   return (
@@ -190,7 +221,7 @@ function MessageList(props) {
                   display: 'inline-block',
                   marginRight: '8px'
                 }}
-                src={`https://github.com/vitorgaletti.png`}
+                src={`https://github.com/${mensagem.de}.png`}
               />
               <Text tag="strong">{mensagem.de}</Text>
               <Text
