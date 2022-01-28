@@ -2,6 +2,7 @@ import React from 'react';
 import { createClient } from '@supabase/supabase-js';
 import appConfig from '../config.json';
 import { Box, Text, TextField, Image, Button } from '@skynexui/components';
+import CircularProgress from '@mui/material/CircularProgress';
 
 const SUPABASE_ANON_KEY =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTY0MzI2MDMxMywiZXhwIjoxOTU4ODM2MzEzfQ.LSA5by-ur_BIrTUY8qxbDS4qTOZ1bIc4ch38vt3ZEA4';
@@ -12,6 +13,7 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 export default function ChatPage() {
   const [mensagem, setMensagem] = React.useState('');
   const [listaDeMensagens, setListaDeMensagens] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
     supabaseClient
@@ -20,6 +22,7 @@ export default function ChatPage() {
       .order('id', { ascending: false })
       .then(({ data }) => {
         setListaDeMensagens(data);
+        setLoading(false);
       });
   }, []);
 
@@ -99,10 +102,23 @@ export default function ChatPage() {
             padding: '16px'
           }}
         >
-          <MessageList
-            mensagens={listaDeMensagens}
-            excluirMensagem={handleExcluirMensagem}
-          />
+          {loading ? (
+            <Box
+              styleSheet={{
+                height: '100%',
+                display: 'grid',
+                placeItems: 'center'
+              }}
+            >
+              <CircularProgress disableShrink />
+            </Box>
+          ) : (
+            <MessageList
+              mensagens={listaDeMensagens}
+              excluirMensagem={handleExcluirMensagem}
+            />
+          )}
+
           <Box
             as="form"
             styleSheet={{
