@@ -56,12 +56,11 @@ export default function PaginaInicial() {
             backgroundColor: appConfig.theme.colors.neutrals[700]
           }}
         >
-          {/* Formulário */}
           <Box
             as="form"
             onSubmit={function (event) {
               event.preventDefault();
-              roteamento.push('/chat');
+              roteamento.push(`/chat?username=${username}`);
             }}
             styleSheet={{
               display: 'flex',
